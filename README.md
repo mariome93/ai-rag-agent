@@ -1,126 +1,164 @@
-# 🤖 Portfolio AI Engineering — 3 Proyectos
+ 📄 AI RAG Agent — Document Q&A Chatbot
 
-Proyectos diseñados para demostrar habilidades en **Prompt Engineering**, **LLMs** y **automatización con IA**.
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-2.0_Flash-4285F4?style=flat&logo=google&logoColor=white)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_DB-6366F1?style=flat)
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B?style=flat&logo=streamlit&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-22C55E?style=flat)
+
+> Chatbot inteligente que responde preguntas sobre cualquier PDF usando **Retrieval-Augmented Generation (RAG)**. Cada respuesta cita la página exacta de donde proviene la información — sin alucinaciones.
 
 ---
 
-## Proyecto 1: Agente RAG 📄
-**Carpeta:** `proyecto1_rag/`
+## ✨ Demo
 
-Chatbot que responde preguntas sobre cualquier PDF usando Retrieval-Augmented Generation.
+```
+Usuario: ¿Cuáles son las políticas de vacaciones?
+Agente:  Según el documento, los empleados tienen derecho a 15 días hábiles
+         de vacaciones al año... (Fuente: página 12)
+```
 
-**Stack:** Python · LangChain · Anthropic Claude · ChromaDB · Streamlit
+---
+
+## 🏗️ Cómo funciona
+
+```
+PDF subido por el usuario
+        │
+        ▼
+  Extracción de texto por página (PyPDF)
+        │
+        ▼
+  División en chunks de 800 caracteres con overlap de 100
+        │
+        ▼
+  Embeddings con gemini-embedding-001 (Google)
+        │
+        ▼
+  Almacenamiento en ChromaDB (base vectorial en memoria)
+        │
+        ▼  ← Pregunta del usuario → búsqueda semántica (top 4 chunks)
+        │
+        ▼
+  Gemini 2.0 Flash genera respuesta solo con el contexto recuperado
+        │
+        ▼
+  Streamlit muestra respuesta + páginas fuente
+```
+
+---
+
+## 🚀 Instalación paso a paso
+
+### Paso 1 — Clona el repositorio
 
 ```bash
-cd proyecto1_rag
-pip install -r requirements.txt
-# Agrega tu API key de Anthropic
+git clone https://github.com/mariome93/ai-rag-agent.git
+cd ai-rag-agent
+```
+
+### Paso 2 — Crea un entorno virtual (recomendado)
+
+**Mac / Linux:**
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+**Windows:**
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+### Paso 3 — Instala las dependencias
+
+```bash
+pip install streamlit chromadb google-genai pypdf
+```
+
+### Paso 4 — Obtén tu API key de Gemini (gratis)
+
+1. Ve a [aistudio.google.com](https://aistudio.google.com)
+2. Inicia sesión con tu cuenta de Google
+3. Clic en **"Get API key"** → **"Create API key"**
+4. Copia la key (empieza con `AIza...`)
+
+> No necesitas tarjeta de crédito. El plan gratuito incluye 1,500 requests/día.
+
+### Paso 5 — Corre la aplicación
+
+```bash
 streamlit run app.py
 ```
 
-**Lo que demuestra:**
-- Manejo de documentos privados con LLMs (sin filtrar datos al modelo innecesariamente)
-- Arquitectura RAG: chunking → embeddings → vector search → respuesta citada
-- UI interactiva lista para demo en vivo
+Se abrirá automáticamente en tu navegador en `http://localhost:8501`
+
+### Paso 6 — Úsala
+
+1. Pega tu API key de Gemini en el panel lateral izquierdo
+2. Sube cualquier archivo PDF
+3. Espera a que procese los embeddings (barra de progreso)
+4. Escribe tu pregunta en el chat y presiona Enter
 
 ---
 
-## Proyecto 2: Pipeline de Automatización 🔄
-**Carpeta:** `proyecto2_pipeline/`
+## 📦 Dependencias
 
-Convierte cualquier texto largo en 3 piezas de contenido lisas para publicar, retornando JSON estructurado integrable con Make.com o n8n.
+| Librería | Versión | Uso |
+|---|---|---|
+| `streamlit` | ≥1.35 | Interfaz web |
+| `google-genai` | última | LLM + Embeddings (Gemini) |
+| `chromadb` | ≥0.5 | Base de datos vectorial |
+| `pypdf` | ≥4.2 | Extracción de texto de PDFs |
 
-**Stack:** Python · Anthropic Claude API
+> ⚠️ Usa `google-genai` (SDK nuevo), **no** `google-generativeai` (deprecated).
 
-```bash
-cd proyecto2_pipeline
-pip install -r requirements.txt
-export ANTHROPIC_API_KEY="sk-ant-..."
+---
 
-# Con archivo de texto
-python pipeline.py --input ejemplo_input.txt --save
+## 🔧 Configuración
 
-# Con texto directo
-python pipeline.py --text "Tu artículo aquí..." --save
+Puedes ajustar estos parámetros al inicio de `app.py`:
+
+```python
+GEMINI_MODEL  = "gemini-2.0-flash"      # Modelo de chat
+EMBED_MODEL   = "gemini-embedding-001"  # Modelo de embeddings
+CHUNK_SIZE    = 800                     # Tamaño de cada fragmento
+CHUNK_OVERLAP = 100                     # Solapamiento entre fragmentos
 ```
 
-**Output JSON incluye:**
-- `slack_summary` — resumen con bullets y nivel de urgencia
-- `linkedin_post` — hook + cuerpo + hashtags + estimación de alcance
-- `sentiment_analysis` — score, emociones, tono, recomendaciones
-
-**Lo que demuestra:**
-- System prompts avanzados para roles específicos
-- Structured outputs (JSON estricto) para integración con otros sistemas
-- Manejo de errores y limpieza de respuestas del modelo
+**Modelos de chat disponibles** (según tu cuenta de Google):
+- `gemini-2.0-flash` — rápido y gratuito ✅
+- `gemini-2.5-flash` — más capaz, también gratuito ✅
+- `gemini-2.5-pro` — el más potente
 
 ---
 
-## Proyecto 3: Auditor de Contenido 🎯
-**Carpeta:** `proyecto3_auditor/`
+## ⚠️ Límites del plan gratuito
 
-Evalúa qué tan alineado está un texto con las directrices de marca de una empresa, devolviendo una puntuación 0-100 con violaciones concretas y sugerencias de mejora.
+| Modelo | Requests/día | Requests/minuto |
+|---|---|---|
+| gemini-2.0-flash | 1,500 | 15 |
+| gemini-2.5-flash | 500 | 10 |
 
-**Stack:** Python · Anthropic Claude API
-
-```bash
-cd proyecto3_auditor
-pip install -r requirements.txt
-export ANTHROPIC_API_KEY="sk-ant-..."
-
-# Con brand guidelines personalizados
-python auditor.py --input mi_articulo.txt --brand brand_template.json
-
-# Con brand guidelines por defecto (AcmeCorp de ejemplo)
-python auditor.py --text "Nuestro producto es literalmente el mejor del mercado..."
-```
-
-**Output incluye:**
-- Puntuación global y por categoría (tono, reglas, palabras prohibidas, fit de audiencia)
-- Lista de violaciones con severidad, cita exacta y sugerencia de reescritura
-- Reescritura sugerida del primer párrafo
-
-**Lo que demuestra:**
-- Prompt engineering para evaluación estructurada y consistente
-- JSON schema enforcement en respuestas del modelo
-- Aplicación directa a metodologías de consultoría (ej: auditorías de marca)
+Si ves un error `429 RESOURCE_EXHAUSTED`, espera unos minutos o el día siguiente. El límite se resetea automáticamente.
 
 ---
 
-## Estructura del Repositorio
+## 🎯 Casos de uso
 
-```
-portfolio/
-├── README.md                         ← Este archivo
-├── proyecto1_rag/
-│   ├── app.py                        ← App Streamlit principal
-│   └── requirements.txt
-├── proyecto2_pipeline/
-│   ├── pipeline.py                   ← Script principal
-│   ├── ejemplo_input.txt             ← Texto de prueba
-│   └── requirements.txt
-└── proyecto3_auditor/
-    ├── auditor.py                    ← Script principal
-    ├── brand_template.json           ← Plantilla de directrices de marca
-    └── requirements.txt
-```
+- **Onboarding empresarial** — asistente sobre manuales de empleados
+- **Legal** — Q&A sobre contratos y reglamentos
+- **Soporte técnico** — chatbot sobre documentación de producto
+- **Educación** — asistente de estudio sobre libros de texto
 
 ---
 
-## Habilidades demostradas
+## 🤝 Parte de mi portafolio AI
 
-| Habilidad | Proyectos |
-|---|---|
-| Prompt Engineering (System Prompts, roles) | 1, 2, 3 |
-| Structured Outputs / JSON enforcement | 2, 3 |
-| RAG Architecture | 1 |
-| Vector Databases (ChromaDB) | 1 |
-| LangChain | 1 |
-| Anthropic Claude API | 1, 2, 3 |
-| Streamlit (UI) | 1 |
-| Automatización / integración con Make.com, n8n | 2 |
-| Evaluación y auditoría de contenido con IA | 3 |
+- 🔗 [ai-content-pipeline](https://github.com/mariome93/ai-content-pipeline) — Pipeline de automatización de contenido
+- 🔗 [ai-brand-auditor](https://github.com/mariome93/ai-brand-auditor) — Auditor de contenido por IA
 
 ---
 
-*Desarrollado como portafolio profesional de AI Engineering / Prompt Engineering.*
+*Desarrollado por [@mariome93](https://github.com/mariome93)*
